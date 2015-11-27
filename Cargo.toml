@@ -1,0 +1,25 @@
+[package]
+name    = "curses"
+version = "0.1.0"
+
+authors = ["meh. <meh@schizofreni.co>"]
+license = "WTFPL"
+
+description = "Safe curses wrapper"
+repository  = "https://github.com/meh/rust-curses"
+keywords    = ["curses", "terminal", "ansi"]
+
+[dependencies]
+libc     = "0.2"
+bitflags = "0.3"
+
+[features]
+default = []
+
+menu  = ["curses-sys/menu"]
+form  = ["curses-sys/form"]
+panel = ["curses-sys/panel"]
+
+[dependencies.curses-sys]
+path     = "../curses-sys"
+features = ["wide", "mouse", "extensions"]
