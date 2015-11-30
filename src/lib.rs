@@ -16,6 +16,9 @@ pub use color::Color;
 pub mod attribute;
 pub use attribute::Attributes;
 
+mod width;
+pub use width::Width;
+
 pub mod screen;
 pub use screen::Screen;
 
