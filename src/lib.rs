@@ -2,6 +2,9 @@ extern crate libc;
 #[macro_use] extern crate bitflags;
 extern crate curses_sys as curses;
 
+extern crate unicode_segmentation;
+extern crate unicode_width;
+
 pub use curses as sys;
 
 mod error;
