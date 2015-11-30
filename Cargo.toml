@@ -24,5 +24,5 @@ form  = ["curses-sys/form"]
 panel = ["curses-sys/panel"]
 
 [dependencies.curses-sys]
-path     = "../curses-sys"
+version  = "6.0"
 features = ["wide", "mouse", "extensions"]
