@@ -19,6 +19,9 @@ pub use attribute::Attributes;
 mod width;
 pub use width::Width;
 
+mod character;
+pub use character::Character;
+
 pub mod screen;
 pub use screen::Screen;
 
