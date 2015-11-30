@@ -83,11 +83,10 @@ impl<'a> Colors<'a> {
 	#[inline]
 	pub fn set(self, pair: usize) -> Result<&'a mut Screen, Error> {
 		unsafe {
-			match Error::check(curses::color_set(pair as c_short, ptr::null())) {
-				Ok(..) => Ok(self.screen),
-				Err(e) => Err(e)
-			}
+			try!(Error::check(curses::color_set(pair as c_short, ptr::null())));
 		}
+
+		Ok(self.screen)
 	}
 
 	#[inline]

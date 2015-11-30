@@ -20,41 +20,37 @@ impl<'a> Attributes<'a> {
 	#[inline]
 	pub fn on(self, attr: Attr) -> Result<&'a mut Screen, Error> {
 		unsafe {
-			match Error::check(curses::attron(attr.bits() as c_int)) {
-				Ok(..) => Ok(self.screen),
-				Err(e) => Err(e),
-			}
+			try!(Error::check(curses::attron(attr.bits() as c_int)));
 		}
+
+		Ok(self.screen)
 	}
 
 	#[inline]
 	pub fn off(self, attr: Attr) -> Result<&'a mut Screen, Error> {
 		unsafe {
-			match Error::check(curses::attroff(attr.bits() as c_int)) {
-				Ok(..) => Ok(self.screen),
-				Err(e) => Err(e),
-			}
+			try!(Error::check(curses::attroff(attr.bits() as c_int)));
 		}
+
+		Ok(self.screen)
 	}
 
 	#[inline]
 	pub fn set(self, attr: Attr) -> Result<&'a mut Screen, Error> {
 		unsafe {
-			match Error::check(curses::attrset(attr.bits() as c_int)) {
-				Ok(..) => Ok(self.screen),
-				Err(e) => Err(e),
-			}
+			try!(Error::check(curses::attrset(attr.bits() as c_int)));
 		}
+
+		Ok(self.screen)
 	}
 
 	#[inline]
 	pub fn clear(self) -> Result<&'a mut Screen, Error> {
 		unsafe {
-			match Error::check(curses::standend()) {
-				Ok(..) => Ok(self.screen),
-				Err(e) => Err(e),
-			}
+			try!(Error::check(curses::standend()));
 		}
+
+		Ok(self.screen)
 	}
 
 	#[inline]

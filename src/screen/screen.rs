@@ -1,12 +1,12 @@
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 use std::str::from_utf8_unchecked;
-use std::time::Duration;
 
 use libc::c_int;
 use curses;
 
 use {Window, Error};
-use super::{Input, Colors, Attributes, Capabilities, Clear};
+use super::{Colors, Attributes, Capabilities, Settings};
+use super::{Input, Clear, Line, Add};
 
 pub struct Screen {
 	window: Window,
@@ -14,13 +14,8 @@ pub struct Screen {
 
 impl Screen {
 	#[inline]
-	pub unsafe fn new() -> Result<Screen, Error> {
-		let window = curses::initscr();
-
-		try!(Error::check(curses::start_color()));
-		try!(Error::check(curses::use_default_colors()));
-
-		Ok(Screen { window: Window::wrap(window) })
+	pub unsafe fn wrap(ptr: *mut curses::WINDOW) -> Screen {
+		Screen { window: Window::wrap(ptr) }
 	}
 }
 
@@ -60,9 +55,9 @@ impl Screen {
 	}
 
 	#[inline]
-	pub fn input(&mut self) -> Input {
+	pub fn line(&mut self) -> Line {
 		unsafe {
-			Input::wrap(self)
+			Line::wrap(self)
 		}
 	}
 
@@ -88,98 +83,9 @@ impl Screen {
 	}
 
 	#[inline]
-	pub fn raw(&mut self, value: bool) -> Result<&mut Self, Error> {
+	pub fn settings(&mut self) -> Settings {
 		unsafe {
-			if value {
-				Error::check(curses::raw()).map(|_| self)
-			}
-			else {
-				Error::check(curses::noraw()).map(|_| self)
-			}
-		}
-	}
-
-	#[inline]
-	pub fn buffered(&mut self, value: bool) -> Result<&mut Self, Error> {
-		unsafe {
-			if value {
-				Error::check(curses::nocbreak()).map(|_| self)
-			}
-			else {
-				Error::check(curses::cbreak()).map(|_| self)
-			}
-		}
-	}
-
-	#[inline]
-	pub fn halfdelay(&mut self, value: Option<Duration>) -> Result<&mut Self, Error> {
-		unsafe {
-			if let Some(duration) = value {
-				let seconds = (duration.as_secs() * 1_000) as u64;
-				let nanos   = (duration.subsec_nanos() / 1_000_000) as u64;
-
-				Error::check(curses::halfdelay((seconds + nanos / 100) as c_int)).map(|_| self)
-			}
-			else {
-				Error::check(curses::nocbreak()).map(|_| self)
-			}
-		}
-	}
-
-	#[inline]
-	pub fn echo(&mut self, value: bool) -> Result<&mut Self, Error> {
-		unsafe {
-			if value {
-				Error::check(curses::echo()).map(|_| self)
-			}
-			else {
-				Error::check(curses::noecho()).map(|_| self)
-			}
-		}
-	}
-
-	#[inline]
-	pub fn qiflush(&mut self, value: bool) -> Result<&mut Self, Error> {
-		unsafe {
-			if value {
-				curses::qiflush();
-			}
-			else {
-				curses::noqiflush();
-			}
-
-			Ok(self)
-		}
-	}
-
-	#[inline]
-	pub fn timeout(&mut self, value: Option<Duration>) -> Result<&mut Self, Error> {
-		unsafe {
-			if let Some(duration) = value {
-				let seconds = (duration.as_secs() * 1_000) as u64;
-				let nanos   = (duration.subsec_nanos() / 1_000_000) as u64;
-
-				curses::timeout((seconds + nanos) as c_int);
-			}
-			else {
-				curses::timeout(-1);
-			}
-
-			Ok(self)
-		}
-	}
-
-	#[inline]
-	pub fn flush(&mut self, value: bool) -> Result<&mut Self, Error> {
-		unsafe {
-			Error::check(curses::intrflush(self.window.as_mut_ptr(), value)).map(|_| self)
-		}
-	}
-
-	#[inline]
-	pub fn meta(&mut self, value: bool) -> Result<&mut Self, Error> {
-		unsafe {
-			Error::check(curses::meta(self.window.as_mut_ptr(), value)).map(|_| self)
+			Settings::wrap(self)
 		}
 	}
 
@@ -232,16 +138,23 @@ impl Screen {
 	#[inline]
 	pub fn position(&mut self, x: usize, y: usize) -> Result<&mut Self, Error> {
 		unsafe {
-			Error::check(curses::move_(y as c_int, x as c_int)).map(|_| self)
+			try!(Error::check(curses::move_(y as c_int, x as c_int)));
+		}
+
+		Ok(self)
+	}
+
+	#[inline]
+	pub fn input(&mut self) -> Input {
+		unsafe {
+			Input::wrap(self)
 		}
 	}
-	
-	#[inline]
-	pub fn write<S: AsRef<str>>(&mut self, string: S) -> Result<&mut Self, Error> {
-		unsafe {
-			let string = CString::new(string.as_ref()).unwrap();
 
-			Error::check(curses::addstr(string.as_ptr())).map(|_| self)
+	#[inline]
+	pub fn add(&mut self) -> Add {
+		unsafe {
+			Add::wrap(self)
 		}
 	}
 }
