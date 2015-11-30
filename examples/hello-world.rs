@@ -22,7 +22,7 @@ fn main() {
 		screen
 			.colors().set(c).unwrap()
 			.position(x, y + c).unwrap()
-			.write(desc).unwrap();
+			.add().string(desc).unwrap();
 	}
 
 	screen.refresh().unwrap();
