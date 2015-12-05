@@ -7,6 +7,8 @@ extern crate unicode_width;
 
 pub use curses as sys;
 
+pub type Result<T> = ::std::result::Result<T, Error>;
+
 mod error;
 pub use error::Error;
 
