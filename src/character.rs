@@ -55,6 +55,13 @@ impl Width for Character {
 	}
 }
 
+impl From<curses::cchar_t> for Character {
+	#[inline]
+	fn from(value: curses::cchar_t) -> Character {
+		Character(value)
+	}
+}
+
 impl From<char> for Character {
 	#[inline]
 	fn from(value: char) -> Character {
