@@ -14,14 +14,18 @@ fn main() {
 		screen.colors().define(7, (Color::White,   Default::default())).unwrap();
 	}
 
+	screen.capabilities()
+		.echo(false).unwrap()
+		.raw(true).unwrap();
+
 	let desc = screen.description();
-	let x    = (screen.columns() - desc.len()) / 2;
+	let x    = (screen.columns() - desc.len() as u32) / 2;
 	let y    = (screen.rows() - 7) / 2;
 
 	for c in 1 .. 8 {
 		screen
-			.colors().set(c).unwrap()
-			.position(x, y + c).unwrap()
+			.colors().set(c as usize).unwrap()
+			.cursor(x, y + c).unwrap()
 			.add().string(desc).unwrap();
 	}
 
