@@ -1,15 +1,29 @@
 use std::ffi::CStr;
 use std::str::from_utf8_unchecked;
+use std::collections::HashMap;
 
-use libc::c_int;
+use libc::{c_void, c_int};
 use curses;
 
 use {Error, Result};
 use super::{Colors, Attributes, Capabilities};
 use super::{Input, Clear, Line, Add};
 
+use super::Windows;
+#[cfg(feature = "menu")]
+use super::Menus;
+#[cfg(feature = "panel")]
+use super::Panels;
+#[cfg(feature = "form")]
+use super::Forms;
+
 pub struct Screen {
 	pub window: *mut curses::WINDOW,
+
+	pub windows: HashMap<String, *mut c_void>,
+	pub panels:  HashMap<String, *mut c_void>,
+	pub forms:   HashMap<String, *mut c_void>,
+	pub menus:   HashMap<String, *mut c_void>,
 }
 
 unsafe impl Send for Screen { }
@@ -19,19 +33,21 @@ impl Screen {
 	pub unsafe fn wrap(ptr: *mut curses::WINDOW) -> Screen {
 		Screen {
 			window: ptr,
+
+			windows: HashMap::new(),
+			panels:  HashMap::new(),
+			forms:   HashMap::new(),
+			menus:   HashMap::new(),
 		}
 	}
 }
 
 impl Screen {
 	#[inline]
-	pub fn window(&self) -> &Window {
-		&self.window
-	}
-
-	#[inline]
-	pub fn window_mut(&mut self) -> &mut Window {
-		&mut self.window
+	pub fn windows(&mut self) -> Windows {
+		unsafe {
+			Windows::wrap(self)
+		}
 	}
 
 	#[inline]
@@ -180,6 +196,11 @@ impl Drop for Screen {
 	#[inline]
 	fn drop(&mut self) {
 		unsafe {
+			for window in self.windows.values() {
+				curses::delwin(*window);
+			}
+
+			curses::delwin(self.window);
 			curses::endwin();
 		}
 	}
