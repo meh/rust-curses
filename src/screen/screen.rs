@@ -121,16 +121,16 @@ impl Screen {
 	}
 
 	#[inline]
-	pub fn erase(&mut self) -> Result<()> {
+	pub fn erase(&mut self) -> Result<&mut Self> {
 		unsafe {
 			try!(Error::check(curses::erase()));
 		}
 
-		Ok(())
+		Ok(self)
 	}
 
 	#[inline]
-	pub fn clear(&mut self, what: Clear) -> Result<()> {
+	pub fn clear(&mut self, what: Clear) -> Result<&mut Self> {
 		unsafe {
 			match what {
 				Clear::All => {
@@ -147,7 +147,7 @@ impl Screen {
 			}
 		}
 
-		Ok(())
+		Ok(self)
 	}
 
 	#[inline]
