@@ -68,7 +68,7 @@ impl<'a> Window<'a> {
 	#[inline]
 	pub fn sync(&mut self) -> Result<()> {
 		unsafe {
-			try!(Error::check(curses::wsyncup(self.as_mut_ptr())));
+			curses::wsyncup(self.as_mut_ptr());
 		}
 
 		Ok(())
