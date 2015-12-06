@@ -2,7 +2,7 @@ use std::ptr;
 use libc::c_int;
 use curses;
 
-use {Error, Attributes as Attr};
+use {Error, Result, Attributes as Attr};
 use super::Screen;
 
 pub struct Attributes<'a> {
@@ -18,7 +18,7 @@ impl<'a> Attributes<'a> {
 
 impl<'a> Attributes<'a> {
 	#[inline]
-	pub fn on(self, attr: Attr) -> Result<&'a mut Screen, Error> {
+	pub fn on(self, attr: Attr) -> Result<&'a mut Screen> {
 		unsafe {
 			try!(Error::check(curses::attron(attr.bits() as c_int)));
 		}
@@ -27,7 +27,7 @@ impl<'a> Attributes<'a> {
 	}
 
 	#[inline]
-	pub fn off(self, attr: Attr) -> Result<&'a mut Screen, Error> {
+	pub fn off(self, attr: Attr) -> Result<&'a mut Screen> {
 		unsafe {
 			try!(Error::check(curses::attroff(attr.bits() as c_int)));
 		}
@@ -36,7 +36,7 @@ impl<'a> Attributes<'a> {
 	}
 
 	#[inline]
-	pub fn set(self, attr: Attr) -> Result<&'a mut Screen, Error> {
+	pub fn set(self, attr: Attr) -> Result<&'a mut Screen> {
 		unsafe {
 			try!(Error::check(curses::attrset(attr.bits() as c_int)));
 		}
@@ -45,7 +45,7 @@ impl<'a> Attributes<'a> {
 	}
 
 	#[inline]
-	pub fn clear(self) -> Result<&'a mut Screen, Error> {
+	pub fn clear(self) -> Result<&'a mut Screen> {
 		unsafe {
 			try!(Error::check(curses::standend()));
 		}
@@ -61,25 +61,28 @@ impl<'a> Attributes<'a> {
 	}
 
 	#[inline]
-	pub fn current(&self) -> Result<Attr, Error> {
+	pub fn current(&self) -> Result<Attr> {
 		unsafe {
 			let mut attr = 0;
 			let mut pair = 0;
 
-			Error::check(curses::attr_get(&mut attr, &mut pair, ptr::null()))
-				.map(|_| Attr::from_bits_truncate(attr))
+			try!(Error::check(curses::attr_get(&mut attr, &mut pair, ptr::null())));
+
+			Ok(Attr::from_bits_truncate(attr))
 		}
 	}
 
 	#[inline]
-	pub fn change(&mut self, attr: Attr, len: Option<usize>) -> Result<(), Error> {
+	pub fn change(&mut self, attr: Attr, len: Option<usize>) -> Result<()> {
 		unsafe {
 			if let Some(n) = len {
-				Error::check(curses::chgat(n as c_int, attr.bits(), 0, ptr::null()))
+				try!(Error::check(curses::chgat(n as c_int, attr.bits(), 0, ptr::null())));
 			}
 			else {
-				Error::check(curses::chgat(-1, attr.bits(), 0, ptr::null()))
+				try!(Error::check(curses::chgat(-1, attr.bits(), 0, ptr::null())));
 			}
 		}
+
+		Ok(())
 	}
 }

@@ -4,18 +4,22 @@ use std::str::from_utf8_unchecked;
 use libc::c_int;
 use curses;
 
-use {Window, Error};
-use super::{Colors, Attributes, Capabilities, Settings};
+use {Error, Result};
+use super::{Colors, Attributes, Capabilities};
 use super::{Input, Clear, Line, Add};
 
 pub struct Screen {
-	window: Window,
+	pub window: *mut curses::WINDOW,
 }
+
+unsafe impl Send for Screen { }
 
 impl Screen {
 	#[inline]
 	pub unsafe fn wrap(ptr: *mut curses::WINDOW) -> Screen {
-		Screen { window: Window::wrap(ptr) }
+		Screen {
+			window: ptr,
+		}
 	}
 }
 
@@ -45,13 +49,13 @@ impl Screen {
 	}
 
 	#[inline]
-	pub fn columns(&self) -> usize {
-		curses::COLS as usize
+	pub fn columns(&self) -> u32 {
+		curses::COLS as u32
 	}
 
 	#[inline]
-	pub fn rows(&self) -> usize {
-		curses::LINES as usize
+	pub fn rows(&self) -> u32 {
+		curses::LINES as u32
 	}
 
 	#[inline]
@@ -76,67 +80,80 @@ impl Screen {
 	}
 
 	#[inline]
-	pub fn capabilities(&self) -> Capabilities {
+	pub fn capabilities(&mut self) -> Capabilities {
 		unsafe {
 			Capabilities::wrap(self)
 		}
 	}
 
 	#[inline]
-	pub fn settings(&mut self) -> Settings {
+	pub fn refresh(&mut self) -> Result<()> {
 		unsafe {
-			Settings::wrap(self)
+			try!(Error::check(curses::refresh()));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn refresh(&mut self) -> Result<(), Error> {
+	pub fn update(&mut self) -> Result<()> {
 		unsafe {
-			Error::check(curses::refresh())
+			try!(Error::check(curses::doupdate()));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn update(&mut self) -> Result<(), Error> {
+	pub fn erase(&mut self) -> Result<()> {
 		unsafe {
-			Error::check(curses::doupdate())
+			try!(Error::check(curses::erase()));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn erase(&mut self) -> Result<(), Error> {
-		unsafe {
-			Error::check(curses::erase())
-		}
-	}
-
-	#[inline]
-	pub fn clear(&mut self, what: Clear) -> Result<(), Error> {
+	pub fn clear(&mut self, what: Clear) -> Result<()> {
 		unsafe {
 			match what {
-				Clear::All    => Error::check(curses::clear()),
-				Clear::Bottom => Error::check(curses::clrtobot()),
-				Clear::Line   => Error::check(curses::clrtoeol()),
+				Clear::All => {
+					try!(Error::check(curses::clear()));
+				}
+
+				Clear::Bottom => {
+					try!(Error::check(curses::clrtobot()));
+				}
+
+				Clear::Line => {
+					try!(Error::check(curses::clrtoeol()));
+				}
 			}
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn beep(&mut self) -> Result<(), Error> {
+	pub fn beep(&mut self) -> Result<()> {
 		unsafe {
-			Error::check(curses::beep())
+			try!(Error::check(curses::beep()));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn flash(&mut self) -> Result<(), Error> {
+	pub fn flash(&mut self) -> Result<()> {
 		unsafe {
-			Error::check(curses::flash())
+			try!(Error::check(curses::flash()));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn position(&mut self, x: usize, y: usize) -> Result<&mut Self, Error> {
+	pub fn cursor(&mut self, x: u32, y: u32) -> Result<&mut Self> {
 		unsafe {
 			try!(Error::check(curses::move_(y as c_int, x as c_int)));
 		}

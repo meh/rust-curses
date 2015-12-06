@@ -1,5 +1,6 @@
 use curses;
 
+use {Error, Event, Key};
 use super::Screen;
 
 #[allow(dead_code)]
@@ -16,9 +17,26 @@ impl<'a> Input<'a> {
 
 impl<'a> Input<'a> {
 	#[inline]
-	pub fn character(&mut self) -> i32 {
+	pub fn event(&mut self) -> Option<Event> {
 		unsafe {
-			curses::getch()
+			let mut character = 0;
+			let     value     = some!(Error::check(curses::get_wch(&mut character)));
+
+			Event::fetch(value, character)
+		}
+	}
+
+	#[inline]
+	pub fn character(&mut self) -> Option<char> {
+		match self.event() {
+			Some(Event::Key(Key::Char(ch))) =>
+				Some(ch),
+
+			Some(..) =>
+				self.character(),
+
+			None =>
+				None
 		}
 	}
 }

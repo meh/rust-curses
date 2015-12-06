@@ -1,7 +1,7 @@
 use libc::c_int;
 use curses;
 
-use {Error, Character};
+use {Error, Result, Character};
 use super::Screen;
 
 pub struct Add<'a> {
@@ -17,7 +17,7 @@ impl<'a> Add<'a> {
 
 impl<'a> Add<'a> {
 	#[inline]
-	pub fn string<S: AsRef<str>>(self, string: S) -> Result<&'a mut Screen, Error> {
+	pub fn string<S: AsRef<str>>(self, string: S) -> Result<&'a mut Screen> {
 		unsafe {
 			let string = string.as_ref();
 			let bytes  = string.as_bytes();
@@ -28,7 +28,7 @@ impl<'a> Add<'a> {
 		Ok(self.screen)
 	}
 
-	pub fn character<C: Into<Character>>(self, character: C) -> Result<&'a mut Screen, Error> {
+	pub fn character<C: Into<Character>>(self, character: C) -> Result<&'a mut Screen> {
 		unsafe {
 			let character: Character = character.into();
 

@@ -1,7 +1,7 @@
 use libc::c_int;
 use curses;
 
-use Error;
+use {Error, Result};
 use super::Screen;
 
 #[allow(dead_code)]
@@ -18,23 +18,29 @@ impl<'a> Line<'a> {
 
 impl<'a> Line<'a> {
 	#[inline]
-	pub fn delete(&mut self) -> Result<(), Error> {
+	pub fn delete(&mut self) -> Result<()> {
 		unsafe {
-			Error::check(curses::deleteln())
+			try!(Error::check(curses::deleteln()));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn insert(&mut self, amount: usize) -> Result<(), Error> {
+	pub fn insert(&mut self, amount: usize) -> Result<()> {
 		unsafe {
-			Error::check(curses::insdelln(amount as c_int))
+			try!(Error::check(curses::insdelln(amount as c_int)));
 		}
+
+		Ok(())
 	}
 
 	#[inline]
-	pub fn replace(&mut self) -> Result<(), Error> {
+	pub fn replace(&mut self) -> Result<()> {
 		unsafe {
-			Error::check(curses::insertln())
+			try!(Error::check(curses::insertln()));
 		}
+
+		Ok(())
 	}
 }

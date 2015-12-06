@@ -1,8 +1,8 @@
 mod screen;
 pub use self::screen::Screen;
 
-mod settings;
-pub use self::settings::{Settings, Scroll};
+mod windows;
+pub use self::windows::Windows;
 
 mod input;
 pub use self::input::Input;
@@ -25,11 +25,12 @@ pub use self::capabilities::Capabilities;
 mod clear;
 pub use self::clear::Clear;
 
-use Error;
+use std::ptr;
+use {Error, Result};
 use curses;
 
 #[inline]
-pub fn init() -> Result<Screen, Error> {
+pub fn init() -> Result<Screen> {
 	use std::sync::atomic::{AtomicBool, Ordering, ATOMIC_BOOL_INIT};
 
 	static INITIALIZED: AtomicBool = ATOMIC_BOOL_INIT;
@@ -47,6 +48,8 @@ pub fn init() -> Result<Screen, Error> {
 
 		try!(Error::check(curses::start_color()));
 		try!(Error::check(curses::use_default_colors()));
+
+		curses::mousemask(curses::ALL_MOUSE_EVENTS, ptr::null_mut());
 
 		Ok(Screen::wrap(window))
 	}

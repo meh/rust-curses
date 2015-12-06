@@ -21,12 +21,12 @@ pub enum Error {
 
 impl Error {
 	#[inline]
-	pub fn check(value: c_int) -> Result<(), Error> {
-		if value == curses::E_OK {
-			Ok(())
+	pub fn check(value: c_int) -> Result<c_int, Error> {
+		if value < 0 {
+			Err(Error::from(value))
 		}
 		else {
-			Err(Error::from(value))
+			Ok(value)
 		}
 	}
 }
