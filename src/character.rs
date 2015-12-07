@@ -1,5 +1,7 @@
 use std::mem;
 use std::char;
+use std::result;
+use std::fmt::{self, Write};
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -19,6 +21,18 @@ impl Character {
 }
 
 impl Character {
+	#[inline]
+	pub fn empty() -> Self {
+		unsafe {
+			Character(mem::zeroed())
+		}
+	}
+
+	#[inline]
+	pub fn is_empty(&self) -> bool {
+		self.0.chars[0] == 0
+	}
+
 	#[inline]
 	pub fn attributes(&self) -> Attributes {
 		Attributes::from_bits_truncate(self.0.attr)
@@ -85,5 +99,16 @@ impl<'a> From<&'a str> for Character {
 
 			Character(ch)
 		}
+	}
+}
+
+impl fmt::Display for Character {
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
+		for ch in &self.0.chars {
+			try!(f.write_char(char::from_u32(*ch as u32).unwrap()))
+		}
+
+		Ok(())
 	}
 }
