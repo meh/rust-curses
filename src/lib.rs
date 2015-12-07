@@ -42,6 +42,9 @@ pub use character::Character;
 mod symbol;
 pub use symbol::Symbol;
 
+mod border;
+pub use border::Border;
+
 pub mod screen;
 pub use screen::Screen;
 

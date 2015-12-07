@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use libc::c_int;
 use curses;
 
-use {Error, Result};
+use {Error, Result, Character, Border};
 use super::{Colors, Attributes, Capabilities};
 use super::{Input, Add};
 
@@ -104,5 +104,27 @@ impl<'a> Window<'a> {
 		unsafe {
 			Add::wrap(self)
 		}
+	}
+
+	#[inline]
+	pub fn border(&mut self, desc: Border) -> Result<&mut Self> {
+		unsafe {
+			let ls = desc.left.unwrap_or(Character::empty());
+			let rs = desc.right.unwrap_or(Character::empty());
+			let ts = desc.top.unwrap_or(Character::empty());
+			let bs = desc.bottom.unwrap_or(Character::empty());
+			let tl = desc.top_left.unwrap_or(Character::empty());
+			let tr = desc.top_right.unwrap_or(Character::empty());
+			let bl = desc.bottom_left.unwrap_or(Character::empty());
+			let br = desc.bottom_right.unwrap_or(Character::empty());
+
+			try!(Error::check(curses::wborder_set(self.as_mut_ptr(),
+				cchar!(ls), cchar!(rs),
+				cchar!(ts), cchar!(bs),
+				cchar!(tl), cchar!(tr),
+				cchar!(bl), cchar!(br))));
+		}
+
+		Ok(self)
 	}
 }

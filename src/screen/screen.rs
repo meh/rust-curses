@@ -197,6 +197,28 @@ impl Screen {
 			Add::wrap(self)
 		}
 	}
+
+	#[inline]
+	pub fn border(&mut self, desc: Border) -> Result<&mut Self> {
+		unsafe {
+			let ls = desc.left.unwrap_or(Character::empty());
+			let rs = desc.right.unwrap_or(Character::empty());
+			let ts = desc.top.unwrap_or(Character::empty());
+			let bs = desc.bottom.unwrap_or(Character::empty());
+			let tl = desc.top_left.unwrap_or(Character::empty());
+			let tr = desc.top_right.unwrap_or(Character::empty());
+			let bl = desc.bottom_left.unwrap_or(Character::empty());
+			let br = desc.bottom_right.unwrap_or(Character::empty());
+
+			try!(Error::check(curses::border_set(
+				cchar!(ls), cchar!(rs),
+				cchar!(ts), cchar!(bs),
+				cchar!(tl), cchar!(tr),
+				cchar!(bl), cchar!(br))));
+		}
+
+		Ok(self)
+	}
 }
 
 impl Drop for Screen {

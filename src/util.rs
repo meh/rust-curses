@@ -8,3 +8,14 @@ macro_rules! some {
 		}
 	)
 }
+
+macro_rules! cchar {
+	($expr:expr) => (
+		if $expr.is_empty() {
+			::std::ptr::null()
+		}
+		else {
+			$expr.as_ptr()
+		}
+	)
+}
