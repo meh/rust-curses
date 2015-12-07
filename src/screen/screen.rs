@@ -1,3 +1,4 @@
+use std::result;
 use std::ffi::CStr;
 use std::str::from_utf8_unchecked;
 use std::collections::HashMap;
@@ -5,7 +6,8 @@ use std::collections::HashMap;
 use libc::{c_void, c_int};
 use curses;
 
-use {Error, Result};
+use {Error, Result, Character, Border};
+use super::Suspended;
 use super::{Colors, Attributes, Capabilities};
 use super::{Input, Clear, Line, Add};
 
@@ -43,6 +45,11 @@ impl Screen {
 }
 
 impl Screen {
+	#[inline]
+	pub fn suspend(self) -> result::Result<Suspended, Screen> {
+		Suspended::new(self)
+	}
+
 	#[inline]
 	pub fn windows(&mut self) -> Windows {
 		unsafe {

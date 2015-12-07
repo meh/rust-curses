@@ -25,6 +25,9 @@ pub use self::capabilities::Capabilities;
 mod clear;
 pub use self::clear::Clear;
 
+mod suspended;
+pub use self::suspended::Suspended;
+
 use std::ptr;
 use {Error, Result};
 use curses;
