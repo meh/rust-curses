@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::ops::{RangeFull, Range};
 
 use libc::c_int;
 use curses;
@@ -135,5 +136,35 @@ impl<'a> Window<'a> {
 		}
 
 		Ok(self)
+	}
+
+	#[inline]
+	pub fn touch<T: Touch>(&mut self, what: T) -> Result<&mut Self> {
+		unsafe {
+			if let Some(range) = what.range() {
+				try!(Error::check(curses::touchline(self.as_mut_ptr(), range.start as c_int, (range.end - range.start) as c_int)));
+			}
+			else {
+				try!(Error::check(curses::touchwin(self.as_mut_ptr())));
+			}
+		}
+
+		Ok(self)
+	}
+}
+
+pub trait Touch {
+	fn range(&self) -> Option<Range<usize>>;
+}
+
+impl Touch for Range<usize> {
+	fn range(&self) -> Option<Range<usize>> {
+		Some(self.clone())
+	}
+}
+
+impl Touch for RangeFull {
+	fn range(&self) -> Option<Range<usize>> {
+		None
 	}
 }
