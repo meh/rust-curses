@@ -84,6 +84,15 @@ impl<'a> Window<'a> {
 	}
 
 	#[inline]
+	pub fn scroll(&mut self, amount: usize) -> Result<&mut Self> {
+		unsafe {
+			try!(Error::check(curses::wscrl(self.as_mut_ptr(), amount as c_int)));
+		}
+		
+		Ok(self)
+	}
+
+	#[inline]
 	pub fn cursor(&mut self, x: u32, y: u32) -> Result<&mut Self> {
 		unsafe {
 			try!(Error::check(curses::wmove(self.as_mut_ptr(), y as c_int, x as c_int)));
