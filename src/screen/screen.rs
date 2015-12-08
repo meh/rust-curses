@@ -128,6 +128,15 @@ impl Screen {
 	}
 
 	#[inline]
+	pub fn scroll(&mut self, amount: usize) -> Result<&mut Self> {
+		unsafe {
+			try!(Error::check(curses::scrl(amount as c_int)));
+		}
+
+		Ok(self)
+	}
+
+	#[inline]
 	pub fn erase(&mut self) -> Result<&mut Self> {
 		unsafe {
 			try!(Error::check(curses::erase()));
