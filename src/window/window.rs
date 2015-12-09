@@ -58,12 +58,12 @@ impl<'a> Window<'a> {
 	}
 
 	#[inline]
-	pub fn position(&mut self, x: u32, y: u32) -> Result<()> {
+	pub fn position(&mut self, x: u32, y: u32) -> Result<&mut Self> {
 		unsafe {
 			try!(Error::check(curses::mvwin(self.as_mut_ptr(), y as c_int, x as c_int)));
 		}
 
-		Ok(())
+		Ok(self)
 	}
 
 	#[inline]
