@@ -4,6 +4,11 @@ pub use self::screen::Screen;
 mod windows;
 pub use self::windows::Windows;
 
+#[cfg(feature = "panel")]
+mod panels;
+#[cfg(feature = "panel")]
+pub use self::panels::Panels;
+
 mod input;
 pub use self::input::Input;
 

@@ -57,6 +57,14 @@ impl Screen {
 		}
 	}
 
+	#[cfg(feature = "panel")]
+	#[inline]
+	pub fn panels(&mut self) -> Panels {
+		unsafe {
+			Panels::wrap(self)
+		}
+	}
+
 	#[inline]
 	pub fn description(&self) -> &'static str {
 		unsafe {
@@ -234,12 +242,30 @@ impl Drop for Screen {
 	#[inline]
 	fn drop(&mut self) {
 		unsafe {
-			for window in self.windows.values() {
-				curses::delwin(*window);
-			}
+			drop_windows(&mut self.windows);
+			drop_panels(&mut self.panels);
 
 			curses::delwin(self.window);
 			curses::endwin();
 		}
 	}
 }
+
+unsafe fn drop_windows(map: &mut HashMap<String, *mut c_void>) {
+	for &window in map.values() {
+		curses::delwin(window as *mut _);
+	}
+}
+
+#[cfg(feature = "panel")]
+unsafe fn drop_panels(map: &mut HashMap<String, *mut c_void>) {
+	for &panel in map.values() {
+		let window = curses::panel_window(panel as *const _);
+
+		curses::del_panel(panel as *mut _);
+		curses::delwin(window);
+	}
+}
+
+#[cfg(not(feature = "panel"))]
+unsafe fn drop_panels(_: &mut HashMap<String, *mut c_void>) { }

@@ -52,3 +52,8 @@ pub mod window;
 pub use window::Window;
 
 pub mod cursor;
+
+#[cfg(feature = "panel")]
+pub mod panel;
+#[cfg(feature = "panel")]
+pub use panel::Panel;
